@@ -8,7 +8,8 @@ import { Observable } from 'rxjs/Observable';
 
 // module
 import { NameListService } from '../services/name-list.service';
-import { NameList } from '../actions/index';
+import * as NameList from '../actions/index';
+import { Name } from '../models/sample.model';
 
 @Injectable()
 export class SampleEffects {
@@ -18,22 +19,18 @@ export class SampleEffects {
    * the effect immediately on startup.
    */
   @Effect() init$: Observable<Action> = this.actions$
-    .ofType(NameList.ActionTypes.INIT)
-    .startWith(new NameList.InitAction)
-    .switchMap(() => this.nameListService.getNames())
-    .map(payload => {
-      let names = payload;
-      return new NameList.InitializedAction(names);
-    })
-    // nothing reacting to failure at moment but you could if you want (here for example)
-    .catch(() => Observable.of(new NameList.InitFailedAction()));
+    .ofType<NameList.InitAction>(NameList.INIT)
+    .map(action => action.payload)
+    .switchMap(() =>
+      this.nameListService.getNames().map((names: Name[]) => new NameList.InitAction(names))
+    );
 
   @Effect() add$: Observable<Action> = this.actions$
-    .ofType(NameList.ActionTypes.ADD)
+    .ofType<NameList.AddAction>(NameList.ADD)
     .map(action => {
-      let name = action.payload;
+      let name: Name = action.payload;
       // analytics
-      this.nameListService.track(NameList.ActionTypes.NAME_ADDED, { label: name });
+      this.nameListService.track(NameList.NAME_ADDED, {label: name.name});
       return new NameList.NameAddedAction(name);
     });
 

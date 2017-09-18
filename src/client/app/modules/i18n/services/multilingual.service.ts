@@ -13,7 +13,7 @@ import { IAppState } from '../../ngrx/index';
 
 // module
 import { CATEGORY } from '../common/category.common';
-import { IMultilingualState, initialState } from '../states/index';
+import { IMultilingualState, initialState, getLang } from '../reducers/index';
 import { ChangeAction } from '../actions/index';
 
 // provide supported languages at runtime
@@ -45,11 +45,24 @@ export class MultilingualService extends Analytics {
     // use browser/platform lang if available
     let userLang = win.navigator.language.split('-')[0];
 
-    // subscribe to changes
-    store.select(s => s.i18n).subscribe((state: IMultilingualState) => {
+    // // subscribe to changes
+    // store.select(s => s.i18n).subscribe((state: IMultilingualState) => {
+    //   // update ng2-translate which will cause translations to occur wherever the TranslatePipe is used in the view
+    //   this.translate.use(state.lang);
+    // });
+    this.store.select('i18n').subscribe(data => console.log(data));
+    console.log(store);
+    store.subscribe((state: IAppState) => {
       // update ng2-translate which will cause translations to occur wherever the TranslatePipe is used in the view
-      this.translate.use(state.lang);
+      console.log('THE STATE' + JSON.stringify(state));
+      // this.translate.use(state.lang);
     });
+
+    // store.select(s => s.i18n).subscribe((state: IMultilingualState) => {
+    //     // update ng2-translate which will cause translations to occur wherever the TranslatePipe is used in the view
+    //     console.log('THE STATE' + state);
+    //     this.translate.use(state.lang);
+    //   });
 
     // init the lang
     this.store.dispatch(new ChangeAction(userLang));

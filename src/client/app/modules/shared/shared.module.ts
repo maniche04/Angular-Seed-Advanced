@@ -4,6 +4,10 @@ import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+// angular material
+import {MdToolbarModule} from '@angular/material';
+import {MdIconModule} from '@angular/material';
+
 // modules
 import { MultilingualModule } from '../i18n/index';
 import { SHARED_COMPONENTS } from './components/index';
@@ -16,6 +20,11 @@ const SHARED_MODULES: any[] = [
   MultilingualModule
 ];
 
+const ANGULAR_MODULES: any[] = [
+  MdToolbarModule,
+  MdIconModule
+];
+
 /**
  * SharedModule
  * Only for shared components, directives and pipes
@@ -25,7 +34,8 @@ const SHARED_MODULES: any[] = [
 
 @NgModule({
   imports: [
-    ...SHARED_MODULES
+    ...SHARED_MODULES,
+    ...ANGULAR_MODULES
   ],
   declarations: [
     ...SHARED_COMPONENTS

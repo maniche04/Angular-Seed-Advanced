@@ -7,6 +7,6 @@ export = () => {
     'dist/dev/**/*'
   ];
   return gulp.src(src, { base: 'dist/dev' })
-    .pipe(electron({ version: '0.37.2', platform: 'linux' }))
+    .pipe(electron({ version: '0.37.2', platform: 'linux', arch: 'x64' }))
     .pipe(symdest('desktop/linux'));
 };

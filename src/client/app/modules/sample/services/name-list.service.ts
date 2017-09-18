@@ -10,7 +10,8 @@ import { Config } from '../../core/index';
 import { Analytics, AnalyticsService } from '../../analytics/index';
 
 // module
-import { NameList } from '../actions/index';
+import * as NameList from '../actions/index';
+import { Name } from '../models/sample.model';
 
 @Injectable()
 export class NameListService extends Analytics {
@@ -23,7 +24,7 @@ export class NameListService extends Analytics {
     this.category = NameList.CATEGORY;
   }
 
-  getNames(): Observable<Array<string>> {
+  getNames(): Observable<Name[]> {
     return this.http.get(`${Config.IS_MOBILE_NATIVE() ? '/' : ''}assets/data.json`)
       .map(res => res.json());
   }

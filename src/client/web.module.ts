@@ -3,7 +3,14 @@ import { NgModule } from '@angular/core';
 import { APP_BASE_HREF } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Http } from '@angular/http';
+
+// flex layout
+import { FlexLayoutModule } from '@angular/flex-layout';
+
+// angular material
+import { MdButtonModule, MdCheckboxModule } from '@angular/material';
 
 // libs
 import { StoreModule } from '@ngrx/store';
@@ -59,13 +66,16 @@ let DEV_IMPORTS: any[] = [];
 if (String('<%= BUILD_TYPE %>') === 'dev') {
   DEV_IMPORTS = [
     ...DEV_IMPORTS,
-    StoreDevtoolsModule.instrumentOnlyWithExtension()
+    StoreDevtoolsModule.instrument()
   ];
 }
 
 @NgModule({
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
+    MdButtonModule,
+    MdCheckboxModule,
     CoreModule.forRoot([
       { provide: WindowService, useFactory: (win) },
       { provide: StorageService, useFactory: (storage) },
@@ -73,6 +83,7 @@ if (String('<%= BUILD_TYPE %>') === 'dev') {
       { provide: LogTarget, useFactory: (consoleLogTarget), deps: [ConsoleService], multi: true }
     ]),
     routerModule,
+
     AnalyticsModule,
     MultilingualModule.forRoot([{
       provide: TranslateLoader,
@@ -81,9 +92,11 @@ if (String('<%= BUILD_TYPE %>') === 'dev') {
     }]),
     SampleModule,
     // configure app state
-    StoreModule.provideStore(AppReducer),
-    EffectsModule.run(MultilingualEffects),
-    EffectsModule.run(SampleEffects),
+    StoreModule.forRoot(AppReducer),
+    EffectsModule.forRoot([
+      MultilingualEffects,
+      SampleEffects
+    ]),
     // dev environment only imports
     DEV_IMPORTS,
   ],

@@ -1,8 +1,13 @@
 // libs
 import { Observable } from 'rxjs/Observable';
 // import { combineLatest } from 'rxjs/observable/combineLatest';
-import { ActionReducer } from '@ngrx/store';
-import '@ngrx/core/add/operator/select';
+import {
+  ActionReducerMap,
+  createSelector,
+  createFeatureSelector,
+  ActionReducer,
+  MetaReducer,
+} from '@ngrx/store';
 
 /**
  * The compose function is one of our most handy tools. In basic terms, you give
@@ -12,7 +17,7 @@ import '@ngrx/core/add/operator/select';
  *
  * More: https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch5.html
  */
-import { compose } from '@ngrx/core/compose';
+import { compose } from '@ngrx/store';
 
 /**
  * storeFreeze prevents state from being mutated. When mutation occurs, an
@@ -50,16 +55,32 @@ export interface IAppState {
 }
 
 /**
- * Because metareducers take a reducer function and return a new reducer,
- * we can use our compose helper to chain them together. Here we are
- * using combineReducers to make our top level reducer, and then
- * wrapping that in storeLogger. Remember that compose applies
- * the result from right to left.
+ * Our state is composed of a map of action reducer functions.
+ * These reducer functions are called with each dispatched action
+ * and the current or initial state and return a new immutable state.
  */
-const reducers = {
+export const reducers: ActionReducerMap<IAppState> = {
   i18n: fromMultilingual.reducer,
   sample: fromSample.reducer
 };
+
+// console.log all actions
+export function logger(reducer: ActionReducer<IAppState>): ActionReducer<IAppState> {
+  return function(state: IAppState, action: any): IAppState {
+    console.log('state', state);
+    console.log('action', action);
+    return reducer(state, action);
+  };
+}
+
+/**
+ * By default, @ngrx/store uses combineReducers with the reducer map to compose
+ * the root meta-reducer. To add more meta-reducers, provide an array of meta-reducers
+ * that will be composed to form the root meta-reducer.
+ */
+export const metaReducers: MetaReducer<IAppState>[] = 'PROD'
+? [logger, storeFreeze]
+: [];
 
 // ensure state is frozen as extra level of security when developing
 // helps maintain immutability
@@ -75,12 +96,15 @@ export function AppReducer(state: any, action: any) {
   }
 }
 
-export function getMultilingualState(state$: Observable<IAppState>): Observable<fromMultilingual.IMultilingualState> {
-  return state$.select(s => s.i18n);
-}
-export function getNameListState(state$: Observable<IAppState>): Observable<fromSample.ISampleState> {
-  return state$.select(s => s.sample);
-}
+export const getMultilingualState = createFeatureSelector<fromMultilingual.IMultilingualState>('i18n');
+export const getNameListState = createFeatureSelector<fromSample.ISampleState>('sample');
 
-export const getLang: any = compose(fromMultilingual.getLang, getMultilingualState);
-export const getNames: any = compose(fromSample.getNames, getNameListState);
+export const getLang = createSelector(
+  getMultilingualState,
+  fromMultilingual.getLang
+);
+
+export const getNames = createSelector(
+  getNameListState,
+  fromSample.getNames
+);
